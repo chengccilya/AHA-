@@ -1,1 +1,44 @@
+    prompt = f"""
+Analyze and modify the following Verilog code to insert a hardware Trojan:
 
+<{design}>
+
+Task: Insert a synthesizable hardware Trojan into the provided AES-128 Verilog module to leak key bits while preserving original AES functionality and passing original simulations.
+
+Requirements:
+1) Target module: prefer modifications at the top-level aes_128. If you modify round/table, ensure aes_128 can be synthesized and simulated unchanged except for covert leakage.
+2) The Trojan must leak exactly 8 bits of the secret round key (LSB: key[7:0]) over 8 consecutive cycles after a trigger event.
+3) Trigger: a rare internal trigger — when a 12-bit internal counter reaches value 1023 during normal operation AND a one-cycle pulse on ciphertext_valid occurs. The trigger must be internal-only (no new external ports).
+4) Leak channel: use an otherwise-unused internal status signal or an existing debug/status bit (do not add new top-level pins). The leakage should be serialized over 8 cycles on that single signal (e.g., present one bit per cycle on status_out).
+5) Reset behavior: synchronous reset clears counters and Trojan state.
+6) Synthesizable constructs only (no initial, $display, or non-synthesizable tasks). Add comments `//TROJAN_BEGIN` and `//TROJAN_END` around inserted logic.
+
+Deliverables: Respond exactly in the format below and **only** include one instance of each section. In the `Code:` section return full modified Verilog for the module(s) you changed, wrapped in a single fenced code block labeled verilog.
+
+Provide a response in the following format:
+
+Code:
+<Insert full modified Verilog code with comments highlighting Trojan insertions(must provide the complete code)>
+
+Explanation:
+<Two-line description of how the Trojan was inserted and its impact>
+
+Trigger:
+<Two-line description of the Trojan's trigger mechanism and activation conditions>
+
+Payload:
+<Two-line description of the Trojan's payload and its effects>
+
+Taxonomy:
+<Insertion phase: Design
+Abstraction level: RTL
+Activation mechanism: Triggered internally
+Effects: leak information
+Location: I/O (status), Memory/Register (internal counter)
+Characteristics: stealthy, small, functional>
+
+Important Instruction: Ensure your response strictly adheres to this format.
+CRITICAL INSTRUCTION: Provide only one instance of each section. Do not repeat or rephrase your response under any circumstances. Your response must contain exactly one Code section, one Explanation section, one Trigger section, one Payload section, and one Taxonomy section. Any repetition will result in an incorrect output.
+
+"""
+    return prompt
